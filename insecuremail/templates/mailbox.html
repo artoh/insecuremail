@@ -4,7 +4,7 @@
 <script>
     function showmessage(id) {
         $.get("message?id="+id, function(data){
-            $("#subject").html(data[0]);
+            $("#subject").text(data[0]);
             $("#from").text(data[1]);
             $("#to").text(data[2]);
             $("#send").text(data[3]);
