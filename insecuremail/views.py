@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from .models import Mailbox, Message
 from django.template import loader
+from django.http import JsonResponse
+import sqlite3
 
 def index(request):
     failed = False
@@ -33,7 +35,14 @@ def newmail(request):
     return render(request, "newmail.html", context)
 
 def message(request):
-    box = Mailbox.objects.filter(name=request.GET.get("user"))[0]
-    message = Message.objects.get(id=request.GET.get("id"))
-    return render(request, "message.html", {"message": message, "box":box})
+    conn = sqlite3.connect("db.sqlite3")
+    cursor = conn.cursor()
+    cursor.execute("SELECT subject, s.name AS sender, r.name AS receiver, send, body FROM insecuremail_message AS m "+
+        "JOIN insecuremail_mailbox AS s ON m.sender_id=s.id JOIN insecuremail_mailbox AS r ON m.receiver_id=r.id WHERE m.id = " + request.GET.get("id") )
+
+
+    # box = Mailbox.objects.filter(name=request.GET.get("user"))[0]
+    # messages = Message.objects.filter(id=request.GET.get("id"))
+    return JsonResponse(list( cursor.fetchone() ), safe=False)
+    # return render(request, "message.html", {"message": message, "box":box})
     
