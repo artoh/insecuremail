@@ -3,12 +3,12 @@ This application uses Django framework. See installing instructions in the cours
 
 FLAW 1:
 Broken authentication
-Application dosn't use Django's authentication system. It have own authentication database table (where passwords are stored in plain text). After login page the user is recognised with "user" parameter in url address.
+Application does not use Django's authentication system. It have own authentication database table (where passwords are stored in plain text). After login page the user is recognised with "user" parameter in url address.
 Authentication can be fixed easily by using Django's secure authentication system, with @login_required and request.user functions.
 
 FLAW 2:
 Broken access control
-When reading message, applications dosn't check whether current user if receiver of this message. Everybody can fetch any message with the /message API.
+When reading message, applications does not check whether current user if receiver of this message. Everybody can fetch any message with the /message API.
 Fetching message should be secured. There should be @login_required definition and function should check that request.user is receiver of this message.
 
 FLAW 3:
@@ -18,10 +18,10 @@ Django's database model should be used to get message from database. Model funct
 
 FLAW 4:
 Cross-site scripting
-Application allow that user can store any html code (including scirpts) as message body. Application read message body from database and show it in the web page without any sanitation. Malicious user can send message with any script code to another user and it is executed when receiver open the message.
-The most secure way is allow to send only plain text messages. Using Django's template engine instead of our own javascript code will do all the sanitation needed. If we will allow user to use some secure subset of html for text formatting, we can use f.ex. regular expressions to make message body secure before we add it to the page.
+Application allow that user can store any html code (including scirpts) as message body. Application read message body from database and show it on the web page without any sanitation. Malicious user can send message with any script code to another user and it is executed when receiver open the message.
+The most secure way is to allow sending only plain text messages. Using Django's template engine instead of our own javascript code will do all the sanitation needed. If we will allow user to use some secure subset of html for text formatting, we can use f.ex. regular expressions to make message body secure before we add it to the page.
 
 FLAW 5:
 Misconfigurations
-Some importat security middlewares are disabled in settings file, including SecurityMiddleware, CsrfViewMiddleware and XFrameOptionsMiddleware. Now the application is vulnerable for XSS and CSRF attackers. It in this application had authentication, could an attacker get around it and access data as authenticated user.
+Some important security middlewares are disabled in settings file, including SecurityMiddleware, CsrfViewMiddleware and XFrameOptionsMiddleware. Now the application is vulnerable for XSS and CSRF attackers. It in this application had authentication, could an attacker get around it and access data as authenticated user.
 All the security middlewares should be enabled in setting.py file. The POST forms should be secured with {% csfr_token %} tags.
