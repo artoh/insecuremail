@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+<a href="/newmail?user={{box.name}}" class="btn btn-outline-primary float-right">New mail</a>
+<h2>Inbox</h2>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Sender</th>
+            <th>Date</th>
+            <th>Subject</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for message in messages %}
+        <tr onclick="window.location='/message?id={{message.id}}&user={{box.name}}'">
+            <td>{{message.sender.name}}</td>
+            <td>{{message.send}}</td>
+            <td>{{message.subject}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+{% endblock %}

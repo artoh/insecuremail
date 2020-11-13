@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class=card>
+<div class="card-header">
+<h2>{{message.subject}}</h2>
+
+<table>
+    <tr>
+        <td>From</td>
+        <td>{{message.sender.name}}</td>
+    </tr>
+    <tr>
+        <td>To</td>
+        <td>{{message.receiver.name}}</td>
+    </tr>
+    <tr>
+        <td>Date</td>
+        <td>{{message.send}}</td>
+    </tr>
+</table>
+</div>
+<div class="card-body">
+
+<p>{{message.body}}</p>
+</div>
+</div>
+
+
+{% endblock %}

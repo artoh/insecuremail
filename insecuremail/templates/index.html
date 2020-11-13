@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if failed %}
+<div class="container">
+<div class="alert alert-danger alert-dismissibl">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong>Password incorrect.</strong> Please try again.
+</div>
+{% endif %}
+<form action="/" method="POST">
+    <div class="form-group">
+        <label for="mailbox">Select your mailbox</label>
+        <select name="mailbox" class="form-control">
+            {% for box in boxes %}
+            <option value={{box.name}}>{{box.name}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" name="password" class="form-control"/>
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+
+</form>
+
+</div>
+<div class="container pt-4">
+
+<div class="jumbotron">
+    <h1>Total unsafe</h1>
+    <p><b>Insecure Mail</b> is my <a href="https://cybersecuritybase.mooc.fi/">Cyber Security Project work I</a> 
+    and it is garantered to be full with security holes.</p>
+</div>
+</div>
+
+{% endblock %}

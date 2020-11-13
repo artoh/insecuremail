@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <title>Insecure Email</title>
+    </head>
+    <body>
+        <h1>Insecure Email</h1>
+        <form action="/" method="POST">
+            <select name="mailbox">
+                {% for box in boxes %}
+                <option value={{box.name}}>{{box.name}} on {{box.password}}</option>
+                {% endfor %}
+            </select>
+            <input type="password" name="password"/>
+        </form>
+    </body>
+</html> 
