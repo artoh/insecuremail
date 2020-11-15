@@ -1,27 +1,28 @@
 LINK: https://github.com/artoh/insecuremail
-This application uses Django framework. See installing instructions in the course material.
+This application uses Django framework. See installing instructions for Python 3 and Django in the course material. Before running application, please run python3 manage.py migrate. Then you can start InsecureMail with command python3 manage.py runserver and go to http://localhost.8000/
 
 FLAW 1:
 Broken authentication
-Application does not use Django's authentication system. It have own authentication database table (where passwords are stored in plain text). After login page the user is recognised with "user" parameter in url address.
-Authentication can be fixed easily by using Django's secure authentication system, with @login_required and request.user functions.
+Application does not use Django's authentication system. It has an own authentication database table where passwords are stored in plain text. On the login page username can be selected from the selection list, what makes it easier to guess credentials. After passing the login page, the user is recognized only with "user" parameter in url address. Because you see all the usernames in login screen it is trivial to use application with any username without knowing user's password just by typing ?user=admin at the end of url.
+The best way to handle authentication is using Django's secure authentication system. Add @login_required decoration before every function in views.py (index function can just redirect to /messagebox page because Django uses build-in login form when user is not authenticated.) Use request.user instead of Mailbox in all the functions: in mailbox to identify mailbox, in newmail to identify sender and in message to make sure that user can read only her/his own mail.
 
 FLAW 2:
 Broken access control
-When reading message, applications does not check whether current user if receiver of this message. Everybody can fetch any message with the /message API.
-Fetching message should be secured. There should be @login_required definition and function should check that request.user is receiver of this message.
+When reading a message, applications does not check whether current user is receiver of this message. Everybody (even without login) can fetch any message with message id number using /message?id= API endpoint.
+Fetching message should be secured. There should be @login_required decoration to make sure that only authenticated user can read messages and message function should check that current user is receiver of this message. Most secure way is to use .filter(receiver=request.user) method when fetching message from the database.
 
 FLAW 3:
 SQL Injection
-Fetching message uses hand-written SQL sentence without any sanitation, appended with parameter in url address. User can inject any SQL sentence in SQL query to be executed.
-Django's database model should be used to get message from database. Model functions does all the sanitation automatically.
+Fetching message uses hand-written SQL sentence without any sanitation. The id query parameter is appended to the end of the query. User can do almost any SQL select query using UNION sentence. For example with /message?id=0%20UNION%20SELECT%20password%2C1%2C1%2C1%2C1%20FROM%20Insecuremail_Mailbox%20WHERE%20name%3D%27admin%27 you can query what is admin's mailbox password.
+Django's database model should be used to get a message from the database. Model functions does all the sanitation automatically. Message can be fetched much easier and safer just by Message.get(id=request.GET.get("id")).filter(receiver=request.user).) In addition, passwords should never be saved in plain text. Using Django's login system all the passwords are stored crypted. Even thought it is possible to read Django's system tables with SQL injection, it is harder to hack crypted passwords.
 
 FLAW 4:
 Cross-site scripting
-Application allow that user can store any html code (including scirpts) as message body. Application read message body from database and show it on the web page without any sanitation. Malicious user can send message with any script code to another user and it is executed when receiver open the message.
-The most secure way is to allow sending only plain text messages. Using Django's template engine instead of our own javascript code will do all the sanitation needed. If we will allow user to use some secure subset of html for text formatting, we can use f.ex. regular expressions to make message body secure before we add it to the page.
+Application allow that user can store any HTML code (including scripts) as message body. Messages are to shown by javascript function which uses ajax request to get data from the InsecureMail server and inject this data to HTML form without any sanitation. At server side message function in views.py fetch a message from the database using handwritten SQL query and send it to the client without any sanitation. If malicious user has sent a message containing script to another user, the script is executed when receiver opens this message. In addition to <script> tags can malicious code be included f.ex. in onClick attributes or even executed with img tag.
+The most secure to fix this problem is to allow sending only plain text messages. Using Django's template engine instead of our own javascript code will do all the sanitation needed (is autoescaping is not disabled). If user has written some script code in message, will application show the raw source code and nothing script is executed. If we really need to allow user to use some secure subset of HTML for text formatting, we can use f.ex. regular expressions to make message body secure before we add it to the page (we can allow only safe tags like bold)
 
 FLAW 5:
-Misconfigurations
-Some important security middlewares are disabled in settings file, including SecurityMiddleware, CsrfViewMiddleware and XFrameOptionsMiddleware. Now the application is vulnerable for XSS and CSRF attackers. It in this application had authentication, could an attacker get around it and access data as authenticated user.
-All the security middlewares should be enabled in setting.py file. The POST forms should be secured with {% csfr_token %} tags.
+Misconfiguration
+Some important security middlewares are disabled in settings file, including SecurityMiddleware, CsrfViewMiddleware and XFrameOptionsMiddleware. Now the application is vulnerable to XSS and CSRF attackers. If this application had authentication, could an attacker get around it and access data as authenticated user. In addition, settings are not turned into release mode. Application will show some debug information if some error occurs and it is possible to get information about technical details related to security.
+All the security middlewares should be enabled in setting.py. It is only needed to uncomment those lines. The POST forms should be secured with {% csfr_token %} tags. If we use javascript to fetch messages, we should add crsf token in our request javascript too.
+We should also turn DEBUG False and change SECRET_KEY value because the value can be found easily in the GitHub repository. Hardening security can be easily done with manage.py check --deploy command.

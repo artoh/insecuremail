@@ -37,8 +37,9 @@ def newmail(request):
 def message(request):
     conn = sqlite3.connect("db.sqlite3")
     cursor = conn.cursor()
-    cursor.execute("SELECT subject, s.name AS sender, r.name AS receiver, send, body FROM insecuremail_message AS m "+
-        "JOIN insecuremail_mailbox AS s ON m.sender_id=s.id JOIN insecuremail_mailbox AS r ON m.receiver_id=r.id WHERE m.id = " + request.GET.get("id") )
+    query = ("SELECT subject, s.name AS sender, r.name AS receiver, send, body FROM insecuremail_message AS m "+
+        "JOIN insecuremail_mailbox AS s ON m.sender_id=s.id JOIN insecuremail_mailbox AS r ON m.receiver_id=r.id WHERE m.id = " + request.GET.get("id") + ";")
+    cursor.execute(query)
 
 
     # box = Mailbox.objects.filter(name=request.GET.get("user"))[0]
